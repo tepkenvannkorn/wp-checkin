@@ -24,7 +24,7 @@ class TicketApi extends Singleton {
 		try {
 			$query = $request->getQueryParam( 's' );
 			if ( ! $query ) {
-				throw new \Exception( '検索キーワードが指定されていません。', 404 );
+				throw new \Exception( 'No search keyword is supplied.', 404 );
 			}
 			$query = explode( ' ', str_replace( '　', ' ', $query ) );
 			$result = $this->search( $query );
@@ -150,7 +150,7 @@ class TicketApi extends Singleton {
 		try {
 			$document = $this->get_reference( $args[ 'ticket_id' ] );
 			if ( ! $document->snapshot()->exists() ) {
-				throw new \Exception( '該当するチケットが存在しません。', 404 );
+				throw new \Exception( 'No matching ticket found.', 404 );
 			}
 			$document->update( [
 				[
@@ -178,7 +178,7 @@ class TicketApi extends Singleton {
 		try {
 			$document = $this->get_reference( $args[ 'ticket_id' ] );
 			if ( ! $document->snapshot()->exists() ) {
-				throw new \Exception( '該当するチケットが存在しません。', 404 );
+				throw new \Exception( 'No matching ticket found.', 404 );
 			}
 			$document->update( [
 				[
@@ -206,12 +206,12 @@ class TicketApi extends Singleton {
 		try {
 			$uploaded_files = $request->getUploadedFiles();
 			if ( empty( $uploaded_files['stat-csv'] ) ) {
-				throw new \Exception( 'CSVファイルが指定されていません。', 400 );
+				throw new \Exception( 'No CSV file is specified.', 400 );
 			}
 			/* @var UploadedFile $file */
 			$file = $uploaded_files['stat-csv'];
 			if ( 'text/csv' !== $file->getClientMediaType() ) {
-				throw new \Exception( 'CSVファイルの形式が不正です。', 400 );
+				throw new \Exception( 'Invalid CSV file format.', 400 );
 			}
 			// List checked in time.
 			$updated = [];
@@ -270,7 +270,7 @@ class TicketApi extends Singleton {
 					$type = 'staff';
 				} else if ( false !== strpos( $coupon, 'thanks' ) ) {
 					$type = 'thanks';
-				} elseif ( false !== strpos( $title, 'マイクロスポンサー' ) )  {
+				} elseif ( false !== strpos( $title, 'Micro Sponsor' ) )  {
 					$type = 'sponsor';
 				} else {
 					$type = 'general';
@@ -345,19 +345,19 @@ class TicketApi extends Singleton {
 		$data = $document->data();
 		$data['id'] = $document->id();
 		// Add role.
-		$role = '一般参加';
+		$role = 'Regular Attendee';
 		foreach ( [
-			'wct-sponsor-2019' => 'スポンサー',
-			'wct-staff-2019'   => 'スタッフ',
-			'wct-speaker-2019' => 'スピーカー',
+			'wct-sponsor-2019' => 'Sponsor',
+			'wct-staff-2019'   => 'Staff',
+			'wct-speaker-2019' => 'Speaker',
 		] as $coupon => $label ) {
 			if ( isset( $data['coupon'] ) && false !== strpos( $data['coupon'], $coupon ) ) {
 				$role = $label;
 				break;
 			}
 		}
-		if ( false !== strpos( $data['category'], 'マイクロスポンサー' ) ) {
-			 $role = 'マイクロスポンサー';
+		if ( false !== strpos( $data['category'], 'Micro Sponsor' ) ) {
+			 $role = 'Micro Sponsor';
 		}
 		$data['role'] = $role;
 		$sorted       = [
@@ -382,22 +382,22 @@ class TicketApi extends Singleton {
 	 */
 	public function add_items( $document ) {
 		$document['items'] = [
-			'パンフレット',
-			'ストラップ',
-			'ギグバンド' . ( $document['u20'] ? '（緑）' : '（黄色）' ),
-			'ナップサック',
+			'Brochure',
+			'Lanyard',
+			'Wristband' . ( $document['u20'] ? ' (green)' : ' (yellow)' ),
+			'bag',
 		];
-		if ( false !== strpos( $document['role'], 'スポンサー' ) ) {
-			$tshirt = 'Tシャツ（グレイ）';
+		if ( false !== strpos( $document['role'], 'Sponsor' ) ) {
+			$tshirt = 'T-shirt (Gray)';
 			if ( ! empty( $document['tshirtsize'] ) ) {
 				$tshirt .= ' - ' . $document['tshirtsize'];
 			} else {
-				$tshirt .= ' - 要サイズ確認';
+				$tshirt .= ' - Size verification required';
 			}
 			$document['items'][] = $tshirt;
 		}
-		if ( false !== strpos( $document['role'], 'スピーカー' ) ) {
-			$document['items'][] = 'Tシャツ（緑） - 要サイズ確認';
+		if ( false !== strpos( $document['role'], 'Speaker' ) ) {
+			$document['items'][] = 'T-shirt (green) - Size verification required';
 		}
 		
 		return $document;
